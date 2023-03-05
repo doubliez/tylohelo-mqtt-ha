@@ -1,0 +1,85 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       sauna_state.proto
+/// \brief      Messages for sauna state and time exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+import "node.proto";
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+
+// Control board relay description
+// Relay is given as an index in order to ease addition of new relays.
+//  0 : E_x3x4
+//  1 : E_x5x6
+//  2 : E_x7x8
+//  3 : E_x9x10
+//  4 : E_x11x12
+//  5 : E_x13x14
+//  6 : E_x15x16
+//  7 : E_x17x18
+//  8 : E_x19x20
+//  9 : E_x21x22
+// 10 : E_x23x24
+// 11 : E_x25x26
+// 12 : E_x27x28
+// 13: E_x29x30
+message Relay
+{
+	optional Node_types.rcb_t control_board = 10;  // Location of relay. Mandatory field.
+	optional uint32 index = 11;     // Relay number, see above. Mandatory field.
+	optional bool available = 12;   // Availability on relay control board, depends on product type
+	optional bool state  = 13;      // Relays state on/off
+}
+
+
+// Notification from sauna system of a changed state value. Values originate from control board.
+message Sauna_state_changed
+{
+	enum state_t
+	{
+		STATE_OFF = 10;
+		STATE_ON = 11;
+		STATE_STANDBY = 12;
+		STATE_DRYUP = 13;
+		STATE_CLEANUP = 14;
+		STATE_DESCALING = 15;
+	}
+
+	optional state_t state = 11; // Sauna operational state.
+    // #APP_GUI# Overview power control.
+
+	optional bool time_valid = 12; // Sauna system time validity.
+
+	optional uint64 time = 13; // Sauna system time as milliseconds that have passed since 2000-01-01 00:00:00.000. Time is valid if field time_valid is not present.
+    // #APP_GUI# Overview status row, affects lower limit in 'Start At' controls in Settings and Calendar tab.
+
+	repeated Relay relay = 14; // Changed relays
+
+}
+
+
+// Request from external system to change a sauna state
+message Sauna_state_change_request
+{
+	enum state_t
+	{
+		STATE_OFF = 10;
+		STATE_ON = 11;
+		STATE_STANDBY = 12;
+	}
+
+	optional state_t state = 10;
+    // #APP_GUI# Overview status row.
+
+	optional uint64 time = 11; // Sauna system time as milliseconds that have passed since 2000-01-01 00:00:00.000. Time is sent each minute or when changed by user.
+    // #APP_GUI# PC panel only.
+}

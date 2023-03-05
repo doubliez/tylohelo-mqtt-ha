@@ -1,0 +1,187 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       integer_value.proto
+/// \brief      Messages for integer value exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Notification from sauna system of a changed integer value. Values originate from control board.
+// Logically this provides multiple messages, these are combined with an enum descriptor to avoid generating a large number of structurally equivalent classes and thereby reduce size of generated code.
+// Note that this is suitable for data included in initial protocol, but not for data added after initial release as that would imply sending an invalid enum value.
+// Data added after initial release is best added as optional fields of main message.
+message Integer_value_changed
+{
+	enum value_t {
+	    TARGET_TEMPERATURE = 10; // Field 'value' is sauna target temperature, unit 9*Celsius. E.g. 75C => 675.
+        // #APP_GUI# Overview, settings tab.
+
+	    STANDBY_OFFSET_TEMPERATURE = 11;  // Field 'value' is sauna standby offset temperature, unit 9*Celsius.
+        // #APP_GUI# PC panel only.
+
+		EXTERNAL_TEMPERATURE = 12;  // Field 'value' is sauna external (room) temperature, unit 9*Celsius. E.g. 75C => 675.
+        // #APP_GUI# Overview tab, non-Tyl� brands circular value presentation, Tyl� info-row
+
+		LOWER_LIMIT_TEMPERATURE = 13;  // Field 'value' is lower limit for target temperature, unit 9*Celsius. Keep LOWER_LIMIT_TEMPERATURE <= UPPER_LIMIT_TEMPERATURE, SYSTEM_LOWER_LIMIT_TEMPERATURE <= LOWER_LIMIT_TEMPERATURE <= TARGET_TEMPERATURE <= UPPER_LIMIT_TEMPERATURE <= SYSTEM_UPPER_LIMIT_TEMPERATURE.
+        // #APP_GUI# Lower limit for temperature edit controls and Overview tab, non-Tyl� brands circular value presentation
+
+		UPPER_LIMIT_TEMPERATURE = 14;  // Field 'value' is upper limit for target temperature, unit 9*Celsius. Keep LOWER_LIMIT_TEMPERATURE <= UPPER_LIMIT_TEMPERATURE. Keep LOWER_LIMIT_TEMPERATURE <= UPPER_LIMIT_TEMPERATURE, SYSTEM_LOWER_LIMIT_TEMPERATURE <= LOWER_LIMIT_TEMPERATURE <= TARGET_TEMPERATURE <= UPPER_LIMIT_TEMPERATURE <= SYSTEM_UPPER_LIMIT_TEMPERATURE.
+        // #APP_GUI# Lower limit for temperature edit controls and Overview tab, non-Tyl� brands circular value presentation
+
+		SYSTEM_LOWER_LIMIT_TEMPERATURE = 15;  // Field 'value' is system lower limit for target temperature, unit 9*Celsius. This value is not changeable by external unit.
+        // #APP_GUI# Not editable using control panel / PC panel.
+
+		SYSTEM_UPPER_LIMIT_TEMPERATURE = 16;  // Field 'value' is system upper limit for target temperature, unit 9*Celsius. This value is not changeable by external unit.
+        // #APP_GUI# PC panel only
+
+		BATH_TIME = 17;  // Field 'value' is bath time in minutes
+        // #APP_GUI# Settings tab.
+
+		MAX_BATH_TIME = 18;  // Field 'value' is maximum bath time in minutes
+        // #APP_GUI# Upper limit for bath time Settings, Favorite and Calendar tab.
+
+		EXTERNAL_HUMIDITY = 19;  // Field 'value' is external (room) humidity, 0-100 is %, 101-111 is step 0-10.
+        // #APP_GUI# Overview tab, non-Tyl� brands circular value presentation, Tyl� info-row
+
+		TARGET_HUMIDITY = 20;  // Field 'value' is target humidity, 0-100 is %, 101-111 is step 0-10. Percent when humidity sensor is present.
+        // #APP_GUI# Overview tab, settings tab
+
+		TANK_WATER_TEMPERATURE = 21; // Field 'value' is water tank temperature, master relay control board. Unit Celsius.
+        // #APP_GUI# PC panel only
+
+		RUN_TIME_LEFT = 22; // Field 'value' is remaining on time in minutes.
+        // #APP_GUI# Overview status row
+
+		TIME_TO_ALLOWED_START = 23; // Field 'value' is remaining time, in minutes, until it is allowed to start sauna due to bath time limits exceeded (Applicable for private and time controlled saunas.)
+        // #APP_GUI# Probably not needed by App, to be checked.
+
+		TANK_STANDBY_TEMPERATURE = 24; // Field 'value' is water tank standby temperature, unit 9*Celsius.
+        // #APP_GUI# PC Panel only
+
+		EXTERNAL_SWITCH_BATH_TIME = 25; // Field 'value' is external switch bath time in minutes.
+        // #APP_GUI# PC Panel only
+
+		SYSTEM_RUN_TIME = 26; // Field 'value' is (total) system run time in minutes.
+        // #APP_GUI# PC Panel only
+
+		TANK_OVERHEAT_LIMIT = 27; // Field 'value' is water tank overheat limit, unit 9*Celsius.
+        // #APP_GUI# PC Panel only
+
+		PCB_OVERHEAT_LIMIT = 28; // Field 'value' is PCB overheat limit, unit 9*Celsius.
+        // #APP_GUI# PC Panel only
+
+		FAN_RUN_TIME = 29; // Field 'value' is fan run time in minutes.
+        // #APP_GUI# PC Panel only
+
+		CLEANUP_TIME_BETWEEN = 30;   // Field 'value' is (run) time between automatic cleanups, unit hours
+        // #APP_GUI# PC panel only.
+
+		CLEANUP_TOTAL_PERFORMED = 31;   // Field 'value' is number of cleanups performed
+        // #APP_GUI# PC panel only.
+
+		LAST_DESCALING = 32;   // Field 'value' is date of last performed descaling, as days since 2000-01-01
+        // #APP_GUI# PC panel only.
+
+		BATH_TIME_TIMER_RESET = 33;   // Bath time has been reset, field 'value' is for future use and set to 0.
+        // #APP_GUI# PC panel only.
+
+		TANK_EMPTYING_DURATION = 34;   // Field 'value' is tank emptying duration in minutes
+        // #APP_GUI# PC panel only.
+
+		TANK_FILL_TIME = 35;   // Field 'value' is tank emptying duration in seconds
+        // #APP_GUI# PC panel only.
+
+		NOT_ALLOWED_START_FROM_TIME = 36;   // Field 'value' is not allowed start time in minutes from 00:00
+        // #APP_GUI# Calendar program save check.
+
+		NOT_ALLOWED_START_UNTIL_TIME = 37;   // Field 'value' is not allowed start until in minutes from 00:00
+        // #APP_GUI# Calendar program save check.
+
+		TANK_WATER_TEMPERATURE_SLAVE_1 = 38; // Field 'value' is water tank temperature, slave 1 relay control board. Unit Celsius.
+        // #APP_GUI# PC panel only
+
+		TANK_WATER_TEMPERATURE_SLAVE_2 = 39; // Field 'value' is water tank temperature, slave 2 relay control board. Unit Celsius.
+        // #APP_GUI# PC panel only
+
+		NEXT_DESCALING = 40;   // Field 'value' is day of next descaling, as days from current data, i.e. 0 means today
+        // #APP_GUI# PC panel only.
+
+
+	}
+
+	optional value_t value_type = 1;   // Mandatory
+
+	optional uint32 value = 2;         // Mandatory
+}
+
+
+// Request from external system to change an integer value
+message Integer_value_change_request
+{
+	enum value_t {
+	    TARGET_TEMPERATURE = 10;  // Field 'value' is sauna target temperature, unit 9*Celsius. E.g. 75C => 675.
+        // #APP_GUI# Settings tab
+
+	    STANDBY_OFFSET_TEMPERATURE = 11;  // Field 'value' is sauna standby offset temperature, unit 9*Celsius.
+        // #APP_GUI# PC panel only
+
+		LOWER_LIMIT_TEMPERATURE = 12;  // Field 'value' is lower limit for target temperature, unit 9*Celsius.
+        // #APP_GUI# Not used
+
+		UPPER_LIMIT_TEMPERATURE = 13;  // Field 'value' is upper limit for target temperature, unit 9*Celsius.
+        // #APP_GUI# PC panel only
+
+		BATH_TIME = 14;  // Field 'value' is bath time in minutes
+        // #APP_GUI# Settings tab
+
+		TARGET_HUMIDITY = 15;  // Field 'value' is target humidity, 0-100 is %, 101-111 is step 0-10. Percent when humidity sensor is present.
+        // #APP_GUI# Settings tab
+
+		START_FAVORITE = 16; // Field 'value' is index of favorite to start.
+        // #APP_GUI# Favorite tab
+
+		TANK_STANDBY_TEMPERATURE = 17; // Field 'value' is water tank standby temperature, 9*Celsius.
+        // #APP_GUI# PC Panel only
+
+		EXTERNAL_SWITCH_BATH_TIME = 18; // Field 'value' is external switch bath time in minutes.
+        // #APP_GUI# PC Panel only
+
+		TANK_OVERHEAT_LIMIT = 19; // Field 'value' is water tank overheat limit, unit 9*Celsius.
+        // #APP_GUI# PC Panel only
+
+		PCB_OVERHEAT_LIMIT = 20; // Field 'value' is PCB overheat limit, unit 9*Celsius.
+        // #APP_GUI# PC Panel only
+
+		FAN_RUN_TIME = 21; // Field 'value' is fan run time in minutes.
+        // #APP_GUI# PC Panel only
+
+		CLEANUP_TIME_BETWEEN = 22;   // Field 'value' is (run) time between automatic cleanups, unit hours
+        // #APP_GUI# PC panel only.
+
+		BATH_TIME_TIMER_RESET = 23;   // Bath time reset, field 'value' is for future use and should be set to 0.
+        // #APP_GUI# PC panel only.
+
+		TANK_EMPTYING_DURATION = 24;   // Field 'value' is tank auto emptying duration in minutes
+        // #APP_GUI# PC panel only.
+
+		TANK_FILL_TIME = 25;   // Field 'value' is tank emptying duration in seconds
+        // #APP_GUI# PC panel only.
+
+		NOT_ALLOWED_START_FROM_TIME = 26;   // Field 'value' is not allowed start time in minutes from 00:00
+        // #APP_GUI# PC panel only.
+
+		NOT_ALLOWED_START_UNTIL_TIME = 27;   // Field 'value' is not allowed start until in minutes from 00:00
+        // #APP_GUI# PC panel only.
+}
+
+	optional value_t value_type = 1;   // Mandatory
+
+	optional uint32 value = 2;         // Mandatory
+}

@@ -1,0 +1,88 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       function_support.proto
+/// \brief      Messages for sauna state exchange between Tyl�Helo system and external unit
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Notification from sauna system of system functionality support.
+// This is normally not changed during run-time.
+// #APP_GUI# Used to know which functions are supported. Most fields does not influence apps. Better to use this data than RCB product type as new products will set this message.
+message Control_board_support
+{
+
+	optional bool bath_type_priority = 10;   // Mandatory field
+
+	optional bool scheduling = 11;    // Mandatory field
+
+	optional bool real_time_clock = 12;    // Mandatory field
+
+	optional bool not_allowed_start = 13;    // Mandatory field
+
+	optional bool auxiliary_relay = 14;    // Mandatory field
+
+	optional bool cleanup = 15;    // Mandatory field
+
+	optional bool fan = 16;    // Mandatory field
+
+	optional bool standby = 17;    // Mandatory field
+
+	optional bool standby_temperature= 18;    // Mandatory field
+
+	optional bool reset_timer = 19;     // Mandatory field
+
+	optional bool humidity_level = 20;     // Mandatory field
+    // #APP_GUI# Humidity edit controls
+
+	optional bool humidity_percent = 21;     // Mandatory field
+    // #APP_GUI# Overview tab, humidity edit controls
+
+	optional bool tank_auto_emptying = 22;     // Mandatory field
+
+	optional bool temperature_set = 23;     // Mandatory field
+
+	optional bool water_level = 24;     // Mandatory field
+
+	optional bool tank_manual = 25;     // Mandatory field
+
+	optional bool water_temperature = 26;    // Mandatory field
+
+	optional bool error_log = 27;     // Mandatory field
+
+	optional bool pcb_overheat_limit = 28;     // Mandatory field
+
+	optional bool external_switch = 29;     // Mandatory field
+
+	optional bool external_switch_bathtime = 30;     // Mandatory field
+
+	optional bool facility_type = 31;     // Mandatory field
+
+	optional bool is_lite_variant = 32;   // true if this is a "Lite" product variant, otherwise false. Mandatory field.
+
+}
+
+
+message Sauna_function_support
+{
+    repeated uint32 supported_characters = 1; // Table of supported Unicode characters. Sent on request, command SEND_CHARACTER_TABLE.
+
+    optional uint32 max_humidity_version = 2; // Mandatory when max_humidity is present.
+
+    repeated uint32 max_humidity = 3; // Table of max humidity from temperature. Sent on request, command SEND_MAX_HUMIDITY_TABLE.
+	// Index is temperature in degrees Celsius, 0..110. Value is humidity in %.
+    // Version 1: Orignal Tyl�Helo limitation table.
+
+    optional uint32 max_temperature_version = 4; // Mandatory when max_temperature is present.
+
+    repeated uint32 max_temperature = 5; // Table of max temperature from humidity. Sent on request, command SEND_MAX_TEMPERATURE_TABLE.
+	// Index is humnidity in %, 0..100. Value is temperature in degrees Celsius
+    // Version 1: Orignal Tyl�Helo limitation table.
+}

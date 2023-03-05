@@ -1,0 +1,37 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       presented_value.proto
+/// \brief      Messages for presented value exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+import "calendar.proto";
+
+
+package tylohelo;
+
+// Notification of changed presented value.
+// Presented values are calculated by control panel.
+// External system which want to follow panel presentation of temperature and humidity should display the presented value. The presented value is calculated using filtering in the control panel.
+// External systems which - like the control panel - show when there is a planned calendar program can use the result of the panel calendar program analysis in the next_active_calendar_post and next_active_calendar_post_shown fields.
+// #APP_GUI# Overview when user settings enables temperature/humidity filtering
+message Presented_value
+{
+
+	optional uint32 temperature = 1;   // Filtered external (room) temperature, unit 9*Celsius. E.g. 75C => 675.
+    // #APP_GUI# If app does not implement filtering itself, this value should be presented in overview tab when User settings enables temperature filtering.
+
+	optional uint32 humidity = 2;      // Filtered external (room) humidity, 0-100 is %, 101-111 is step 0-10
+    // #APP_GUI# If app does not implement filtering itself, this value should be presented in overview tab when User settings enables humidity filtering.
+
+	optional Calendar_post next_active_calendar_post = 10;  // Next planned calendar program. When no calendar program planned, this is a non-valid calendar post.
+    // #APP_GUI# Overview sleep state
+
+	optional bool next_active_calendar_post_shown = 11; // Whether next planned calendar program is shown by the control panel. Mandatory if next_active_calendar_post is a valid post.
+    // #APP_GUI# Overview sleep state
+}

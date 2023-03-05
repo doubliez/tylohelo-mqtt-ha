@@ -1,0 +1,46 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       command.proto
+/// \brief      Messages for general command from external unit to Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Defines general commands without data
+message General_command
+{
+
+	enum command_t {
+		CLEAR_ERROR_LOG = 1; // Request sauna system to clear it's  error log.
+        // #APP_GUI# PC panel only.
+
+        SEND_CHARACTER_TABLE = 2; // Request sauna system to send it's table of supported Unicode characters (message Sauna_functionality_support).
+        // #APP_GUI# To be used to fetch table of supported characters.
+
+		SEND_STATE = 3; // Request sauna system to send complete state. Typically used when external system suspects or detects that connection is unstable or lost. State includes all sauna data except:
+		//- Character table
+		//- Tables of max humidity and max temperature from each other.
+		//- Data sent in Announcement and Connect_reply messages.
+		// #APP_GUI# Connection management.
+
+        SEND_MAX_HUMIDITY_TABLE = 4;  // Request sauna system to send table for maximum humidity from temperature.
+        // #APP_GUI# If tables not implemented in app's, if implemented to update them
+
+        SEND_MAX_TEMPERATURE_TABLE = 5;  // Request sauna system to send table for maximum temperature from humidity.
+        // #APP_GUI# If tables not implemented in app's, if implemented to update them
+
+		RENEW_BATH_TIME = 6;  // Request sauna system to renew (reset) bath time.
+        // #APP_GUI# PC panel only.
+
+	}
+
+	optional command_t command  = 1;  // Mandatory field
+
+}

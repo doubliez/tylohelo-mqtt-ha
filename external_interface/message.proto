@@ -1,0 +1,160 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       message.proto
+/// \brief      Base message for all Tyl� interface messages
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+import "aux_relay.proto";
+import "boolean_value.proto";
+import "calendar.proto";
+import "command.proto";
+import "connect.proto";
+import "enum_value.proto";
+import "error.proto";
+import "favorite.proto";
+import "function_support.proto";
+import "integer_value.proto";
+import "node.proto";
+import "presented_value.proto";
+import "sauna_state.proto";
+import "user_message.proto";
+import "user_setting.proto";
+
+package tylohelo;
+
+
+
+// General about message definitions:
+// - Intended to need only Protocol Buffer Lite library.
+// - Intended for Protocol Buffers language version 2.
+// - Designed to work also with language version 3:
+//   - No required fields
+//   - Extensions not used
+
+// Terminology
+// External system: Device connecting to sauna system. E.g. a smart phone app or a home automation system.
+// Sauna system: Collective name for sauna system devices: control board and control panel.
+// Server: The sauna system. As external system communicates with the control panel the latter acts as server in the communication. However most of the data the external system exchanges with sauna system is actually stored in the control board.
+
+// Communication is over an unreliable channel, typically UDP over WiFi.
+// Therefore protocol include a keep-alive mechanism to detect loss of message.
+// At detected loss of connection sauna system is responsible for sending complete state to external unit.
+
+// The discovery and connection procedure is described in file "connect.proto".
+
+// Important on message field necessity:
+// - Google Protocol Buffers language version 2 provides both required and optional fields, keywords for this are just 'required' and 'optional'.
+// - Starting with language version 3 required fields have been removed, fields are then either 'optional' or 'repeated'.
+// - Hence required fields are not used.
+// - Fields needed to be set present are noted in documentation as 'mandatory'.
+
+// Note on serialization of strings
+// Control panel strings are Unicode (actually Qt QSting, see http://qt-project.org/doc/qt-4.8/qstring.html).
+// Protocol buffers data type 'string' contains 8-bit characters and can not store the Unicode strings.
+// Hence strings are coded as 'repeated uint32', where each element is one 16-bit Unicode character. No foreseen use of Unicode characters with code values >65535 but if used QString will store such as two consecutive QChars so it should work also for these.
+// This applies also to strings specific for external unit, such as it's type and version specified in connect message.
+//
+// The control board is a resurce constrained device, so characters are stored using a 10-bit key.
+// Hence strings stored in the control board, i.e. names of favorites and auxiliary relays, can only contain characters supported by the control board.
+// Unsupported characters will bew ignored. External systems may implement a mechanism to avoid use of unsupproted characters.
+
+// Message from external unit to sauna system
+// Includes all possible messages as optional/repeated fields.
+// External system may set multiple optional fields or provide multiple fields of repeated fields.
+message External_to_sauna
+{
+	optional Connect_request connect_request = 1000;   // If this field is present, all other fields are ignored by sauna system.
+
+	optional Disconnect_request disconnect_request = 1001;
+
+	optional Keep_alive keep_alive = 1002;  // Shall be sent at least with period specified at connect. Sauna system will answer with Sauna_to_external containing Keep_alive.
+
+	// state_request blow replaced by General_command.SEND_STATE
+	//     optional State_request state_request = 1003; // When external system detects loss of connection or by other reasons need update on complete sauna state.
+
+	repeated General_command general_command = 1040;  // General commands without data
+
+	repeated Integer_value_change_request integer_value = 1050;
+
+	repeated Boolean_value_change_request boolean_value = 1060;
+
+	repeated Favorite_post favorite = 1070;
+
+	repeated Calendar_post calendar_program = 1075;
+
+	optional Sauna_state_change_request sauna_state = 1080;
+
+	repeated Aux_relay_post aux_relay = 1090;
+
+	optional Descaling descaling = 1100;
+
+	repeated Enum_value_change_request enum_value = 1110;
+
+	optional User_message user_message = 1120;
+}
+
+
+
+// Message from sauna system to external system at detection of data error.
+// When sauna system detects data which is inconsistent or does not fulfill data semantic conventions, sauna system may send a reply including error description.
+// This is primarily intended for detecting problems during development.
+message Data_error
+{
+    optional string description = 3000; // Description of detected error.
+}
+
+
+// Message from sauna system to external unit
+// Includes all possible messages as optional/repeated fields.
+// Sauna system may set multiple optional fields or provide multiple fields of repeated fields.
+//
+// Note on mandatory fields: Fields documented as mandatory fields are always mandatory for that message. Upon connection establishment, i.e. after successful login, or when explictly requested by client,
+// server will send complete information with all fields set. For update of data, both server and client can send partially filled messages, i.e. only mandatory fields are required.
+message Sauna_to_external
+{
+	optional Connect_reply   connect_reply   = 2000;
+
+	optional No_connection no_connection = 2001;  // Loss of connection.
+
+	optional Keep_alive keep_alive = 2002;  // Sent as reply External_to_sauna.keep_alive.
+
+	repeated Integer_value_changed   integer_value   = 2010;  // Sequence of changed integer values
+
+	repeated Boolean_value_changed   boolean_value   = 2011;  // Sequence of changed boolean  values
+
+	optional User_setting user_setting = 2020;  // Changed user settings
+
+	optional Presented_value presented_value = 2030;  // Changed presented values, calculated by control panel.
+
+	repeated Favorite_post favorite = 2040;	 // Changed favorites
+
+	repeated Calendar_post calendar_program = 2045; // Changed calendar programs
+
+	optional Sauna_state_changed sauna_state = 2050;  // Set of sauna states
+
+	optional Control_board_support control_board_support = 2060;  // Sauna system function support
+
+	repeated Aux_relay_post_sauna aux_relay_sauna = 2070;
+
+	optional Descaling descaling = 2075;
+
+	repeated Error_post error = 2080; // Changed error posts
+
+	optional Warm_up_characteristics warm_up = 2090;
+
+	repeated Enum_value_changed enum_value = 2100;
+
+	optional User_message user_message = 2110;
+
+    optional Sauna_function_support sauna_function_support = 2120;
+
+    repeated Node_item  node = 2130;
+
+	repeated Data_error data_error = 3000;
+}

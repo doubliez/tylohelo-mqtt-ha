@@ -1,0 +1,107 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       sauna_state.proto
+/// \brief      Messages for enumerated value exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Container for sauna state types, not used as message, data types used in messages.
+message Enum_value_types
+{
+	// Sauna water tank level.
+	enum water_level_t
+	{
+		WLVL_LOW = 10;
+		WLVL_MID = 11;
+		WLVL_HIGH = 12;
+		WLVL_UNKNOWN = 13;
+	}
+
+	// Sauna facility type. Applicability is dependent on sauna relay control board product.
+	enum facility_type_t
+	{
+        FAC_TYPE_SUPERVISED = 20;
+        FAC_TYPE_TIME_CONTROLLED = 21;
+        FAC_TYPE_PRIVATE_CONTROLLED = 22;
+        FAC_TYPE_PUBLIC = 23;
+        FAC_TYPE_UNKNOWN = 24;
+	}
+
+	// Sauna region.
+	enum region_t
+	{
+		REGION_EU = 30;
+		REGION_NORTH_AMERICA = 31;
+		REGION_OTHER = 32;
+	}
+
+	// External switch function
+	enum external_switch_function_t
+	{
+		EXTSW_ON_OFF = 40;
+		EXTSW_RENEW = 41;
+	}
+
+	// Bath priority (for Combi)
+	enum bath_priority_t
+	{
+		BATH_PRIO_AUTOMATIC = 50;
+		BATH_PRIO_TEMPERATURE = 51;
+		BATH_PRIO_HUMIDITY = 52;
+	}
+
+}
+
+
+// Notification from sauna system of a changed enumerated value. Values originate from control board.
+message Enum_value_changed
+{
+
+	optional Enum_value_types.facility_type_t facility_type = 10;
+    // #APP_GUI# Used in criteria for showing calendar tab or not.
+
+	optional Enum_value_types.region_t region = 11;
+    // #APP_GUI# Used but details need to be checked.
+
+	optional Enum_value_types.water_level_t water_level = 12;  // Master Relay control board water level
+    // #APP_GUI# Overview status row.
+
+	optional Enum_value_types.external_switch_function_t external_switch_function = 13;
+    // #APP_GUI# Overview status row.
+
+	optional Enum_value_types.bath_priority_t bath_priority = 14;
+    // #APP_GUI# PC panel only
+
+	optional Enum_value_types.water_level_t water_level_slave_1 = 15;  // Slave 1 control board water level
+    // #APP_GUI# When system type is SYSTYP_TYLARIUM, this field shall be used to present water tank level in overview.
+
+	optional Enum_value_types.water_level_t water_level_slave_2 = 16;  // Slave 2 control board water level
+    // #APP_GUI# PC panel only
+
+}
+
+
+// Request from external system to change an enumerated value
+message Enum_value_change_request
+{
+
+	optional Enum_value_types.facility_type_t facility_type = 11;
+    // #APP_GUI# PC panel only.
+
+	optional Enum_value_types.region_t region = 12;
+    // #APP_GUI# PC panel only.
+
+	optional Enum_value_types.external_switch_function_t external_switch_function = 13;
+    // #APP_GUI# Overview status row.
+
+	optional Enum_value_types.bath_priority_t bath_priority = 14;
+    // #APP_GUI# PC panel only
+}

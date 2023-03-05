@@ -1,0 +1,106 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       boolean_value.proto
+/// \brief      Messages for boolean value exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Notification from sauna system of a changed boolean value. Values originate from control board.
+// Logically this provides multiple messages, these are combined with an enum descriptor to avoid generating a large number of structurally equivalent classes and thereby reduce size of generated code.
+// Note that this is suitable for data included in initial protocol, but not for data added after initial release as that would imply sending an invalid enum value.
+// Data added after initial release is best added as optional fields of main message.
+message Boolean_value_changed
+{
+	enum value_t {
+	    LIGHTING = 10;  // Field 'value' is sauna light, true=on.
+        // #APP_GUI# Settings tab.
+
+		STANDBY_ENABLE = 11;  // Field 'value' is whether standby is enabled.
+        // #APP_GUI# Controls whether Power Control is in two or three button mode.
+
+		HUMIDITY_SENSOR_AVAILABLE = 12;  // Field 'value' is status of humidity sensor.
+        // #APP_GUI# For Combi, when no humidity sensor is available:
+        // i. No humidity value in oveview tab.
+        // ii. Humidity value control goes from % to step (multiple tabs).
+
+		DELAYED_START_ENABLE = 13;       // Field 'value' is delayed start enable status, i.e. calendar program 0 is valid.
+        // #APP_GUI# Calendar tab
+
+		DELAYED_START_RUNNING = 14;      // Field 'value' is delayed start active, i.e. calendar program 0 is active.
+        // #APP_GUI# To be checked.
+
+		MAGNETIC_SENSOR_CONNECTED = 15;  // Field 'value' is status of magnetic sensor "door switch"
+        // #APP_GUI# Sent true when door switch changes value. Before magnetic sensor is known to be connected calendar programming is not allowed.
+
+		CALENDAR_WEEKDAY_PROGRAM_DISABLE = 16;   // Field 'value' is global disable of calendar weekday programs.
+        // #APP_GUI# PC panel only.
+
+		FAN_AUTOMATIC  = 17;   // Field 'value' is enable of automatic fan.
+        // #APP_GUI# PC panel only.
+
+		FAN_RUNNING = 18;   // Field 'value' is fan running status.
+        // #APP_GUI# PC panel only.
+
+		CLEANUP_ENABLED = 19;   // Field 'value' is cleanup enable
+        // #APP_GUI# PC panel only.
+
+		TANK_EMPTYING_ENABLED = 20;   // Field 'value' is tank emptying enable
+        // #APP_GUI# PC panel only.
+
+		NOT_ALLOWED_START_ENABLED = 21;   // Field 'value' is not allowed start enable
+        // #APP_GUI# Calendar program save check.
+
+		TANK_NOTICE_ENABLED = 22;
+
+                IR_ENABLED = 23;
+	}
+
+	optional value_t value_type = 1;   // Mandatory
+	optional uint32 value = 2;         // Mandatory
+}
+
+
+// Request from external system to change a boolean value
+message Boolean_value_change_request
+{
+	enum value_t {
+	    LIGHTING = 10; // Field 'value' is sauna light, true=on.
+        // #APP_GUI# Settings tab.
+
+		STANDBY_ENABLE = 11;  // Field 'value' is standby enabled.
+        // #APP_GUI# PC panel only.
+
+		CALENDAR_WEEKDAY_PROGRAM_DISABLE = 12;   // Field 'value' is global disable of calendar weekday programs.
+        // #APP_GUI# PC panel only.
+
+		FAN_AUTOMATIC  = 13;   // Field 'value' is enable of automatic fan.
+        // #APP_GUI# PC panel only.
+
+		FAN_RUNNING = 14;   // Field 'value' is fan running status.
+        // #APP_GUI# PC panel only.
+
+		CLEANUP_ENABLED = 15;   // Field 'value' is cleanup enable
+        // #APP_GUI# PC panel only.
+
+		TANK_EMPTYING_ENABLED = 16;   // Field 'value' is tank emptying enable
+        // #APP_GUI# PC panel only.
+
+		NOT_ALLOWED_START_ENABLED = 17;   // Field 'value' is not allowed start enable
+        // #APP_GUI# PC panel only.
+
+		TANK_NOTICE_ENABLED = 18;
+
+                IR_ENABLED = 19;
+	}
+
+	optional value_t value_type = 1;   // Mandatory
+	optional uint32 value = 2;         // Mandatory
+}

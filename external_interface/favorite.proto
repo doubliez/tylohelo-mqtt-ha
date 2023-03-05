@@ -1,0 +1,38 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       favorite.proto
+/// \brief      Messages for favorite exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Defines a favorite post. A favorite post collects user settings under a user specified name.
+// Due to the characteristics of underlying data storage the favorite name may be separately updated by sauna system.
+// #APP_GUI# Favorites tab, "save as favorite" in settings tab.
+message Favorite_post
+{
+	optional uint32 index = 1;   // Favorite index 0..7. Mandatory field.
+
+	optional bool valid = 2;   // Whether favorite post is used. If post is not valid other remaining fields are not applicable and may be omitted.
+
+	repeated uint32 name = 3;   // Name of favorite. Max string length is 20 characters.
+    // The favorite name is stored in control board and can thus only contains supported characters. See message Sauna_function_support and command SEND_CHARACTER_TABLE.
+
+	optional uint32 humidity_set_point = 4;  // Favorite humidity setpoint, 0-100 is %, 101-111 is step 0-10.
+
+	optional uint32 temperature_set_point = 5;
+
+	optional uint32 bath_time = 6;  // Bath time in minutes.
+
+	optional bool light_on = 7;  // Whether sauna light shall be on.
+
+	repeated bool auxiliary_relay_active = 8; // Table of favorite aux relay activation. Table must contain either 0 or 7 elements, the latter for aux relay 0..6.
+
+}

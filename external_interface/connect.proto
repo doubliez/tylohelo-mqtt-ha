@@ -1,0 +1,220 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       connect.proto
+/// \brief      Messages for connection between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Discovery and connection mechanism:
+// Default mechanism:
+// 1. External unit opens port 54377.
+// 2. Sauna system periodically broadcasts message 'Announcement' to port 54377.
+// 3. External unit receives message 'Announcement':
+//    i. It performs compatibility checks (currently none as no released products).
+//   ii. It does a log-in to sauna system by sending message 'Connect_request' to sauna system on port specified in 'Announcement'.
+// 4. Sauna system replies with message 'Connect_reply'
+//    i. It performs compatibility checks (currently none as no released products).
+//   ii. It performs PIN code verification.
+//
+// Fallback mechanism - e.g. in case external system is unable to open port 54377.
+// 1. Sauna system opens port 54378.
+// 2. External system broadcast message 'Announcement_request' to port 54378.
+// 3. Sauna system replies with message 'Announcement' to port which external system send 'Announce_request' from.
+// 4. Continue according to step 3i in default mechanism.
+
+
+
+// Container for common types to avoid putting symbols in top level package namespace.
+// Not used as message.
+// #APP_GUI# Connection/discovery management.
+message Connection_types
+{
+	// Brand of control panel.
+	enum brand_t {
+		BRAND_TYLO = 40;
+		BRAND_HELO = 41;
+		BRAND_FINNLEO = 42;
+		BRAND_AMEREC = 43;
+	}
+
+	// Type of sauna system
+	enum system_type_t {
+		SYSTYP_STANDARD			 = 20;   // Sauna system contains one RCB, sauna type is given by it's rcb_product_t
+		SYSTYP_MULTISTEAM        = 21;   // Sauna system contains steam as master + 1 or 2 steam as slaves
+		SYSTYP_TYLARIUM          = 22;   // Sauna system contains sauna as master + 1 steam as slave
+	}
+
+
+	// Type of control board.
+	enum rcb_product_t {
+		RCB_COMBI_MANUAL       = 30;
+		RCB_COMBI_AUTO         = 31;
+		RCB_STEAM_PRIVATE      = 32;
+		RCB_STEAM_PRIVATE_AUTO = 33;
+		RCB_STEAM_PUBLIC       = 34;
+		RCB_STEAM_USA          = 35;  // This is named 'Steam Manual Empty' in GUI and documentation
+		RCB_BOX_ADDON          = 36;
+		RCB_SAUNA              = 37;
+		RCB_SAUNA_LOW          = 38;  // Provided for future extension of control board low functionality.
+		RCB_SAUNA_IR	       = 39;
+		RCB_OTHER              = 40;  // Control product board type could not be determined.
+	}
+
+	enum profile_t {
+	    PROFILE_PC_PANEL = 10;
+	    PROFILE_SMART_PHONE_APP = 20;
+        PROFILE_TABLET_APP = 25;
+		PROFILE_HOME_AUTOMATION_SYSTEM = 30;
+		PROFILE_OTHER = 99;
+	}
+
+}
+
+// Description of sauna system features. Used for compatibility checks.
+// #APP_GUI# Connection/discovery management.
+message Sauna_features
+{
+	optional bool clear_text_login = 1;  // If this field is present and set false, sauna system does not support clear-text login using Connect_request.pin field. External system must use an encrypted login method. External system, not supporting any existing encryption-based login need to update. If this field is not present, sauna system supports clear-text login.
+
+	optional bool encrypted_login_xtea = 2; // If this field is present and set to true, sauna system supports XTEA (see e.g. http://en.wikipedia.org/wiki/XTEA) encrypted login. ENCRYPTED LOGIN IS NOT YET IMPLEMENTED IN SAUNA SYSTEM. If this field is not present, sauna system does not support XTEA-based login.
+
+    optional uint32 nb_supported_characters = 20; // Nb of supported characters. Due to technical limitations strings stored in control board are stored using a 10-bit key, i.e. up to 1024 Unicode characters can be handled. This fields contains number of supported characters. This works also as character table generation as once a chararacter is given a key it cannot for backward compatibility reasons be removed. Externals systems can preferable store the table persistently, and in case the size of it's stored table does not match this value, fetches the table using general command SEND_CHARACTER_TABLE.
+
+    optional uint32 max_humidity_version = 21; // Version of table for maximum humidity from temperature, starting at 1.
+
+    optional uint32 max_temperature_version = 22; // Version of table for maximum temperature from humidity, starting at 1.
+}
+
+
+// Description of external system features. Used for compatibility checks.
+// #APP_GUI# Connection/discovery management.
+message External_unit_features
+{
+	optional bool connect_reject_door_switch = 10;    // Whether external system supports CONNECT_REJECTED_DOORSWITCH. Sauna will set this code only if external system supports it.
+}
+
+
+
+// Sent periodically by sauna system as a broadcast message to a specific port.
+// Most data in this message is repeated in the Connect_reply message.
+// #APP_GUI# Connection/discovery management.
+// #APP_GUI# Field rcb_product is used in criteria for showing calendar tab or not.
+message Announcement
+{
+	optional string system_id = 1;  // Unique identity (see http://qt-project.org/doc/qt-4.8/quuid.html) of sauna system.  Mandatory field.
+
+	optional uint32 port = 2;       // Port client should use when connecting to sauna system.
+
+	optional Connection_types.brand_t brand = 3;  // Control panel brand. Mandatory field.
+
+	optional Connection_types.system_type_t system_type = 7;    // Sauna system type. If not present system type is standard.
+
+	optional Connection_types.rcb_product_t rcb_product = 4; // Type of (master) control board. Mandatory field.
+
+	repeated uint32 system_name = 5; // User provided identification name of sauna control panel. Mandatory field.
+
+	optional Sauna_features sauna_features = 6;  // Sauna features, for compatibility support.
+
+	// Field id 7 used above
+
+}
+
+
+// Sent as fallback in case external system can not listen to broadcast Announcement
+// Sauna system will reply with Announcement
+// #APP_GUI# Connection/discovery management.
+message Announcement_request
+{
+	optional Connection_types.profile_t profile = 1;                 // Connecting external unit profile. Mandatory. Not logically necessary but good to have some data in message to filter out spam already at PB decoding level.
+}
+
+
+// Sent by external unit to establish communication with sauna system. Sauna system replies with Connect_reply.
+// Most fields are not mandatory, see field description below.
+// #APP_GUI# Connection/discovery management.
+message Connect_request
+{
+	optional Connection_types.profile_t profile = 1;                 // Connecting external unit profile. Mandatory.
+
+	optional string pin = 2;                        // Sauna PIN code, 4 characters 0-9, e.g. "1234". This field is mandatory. PIN code is sent in clear text, not encrypted, to simplify. Sauna system is not a security sensitive system. Communication is over WiFi, encryption should be enabled in network, so very simple attacks by just listening to messages should not be easy. However, for those who know the protocol, attacks are possible.
+
+	repeated uint32 device_description = 3;         // Description of connecting device, e.g. "Samsung Galaxy S4". Not mandatory.
+
+	repeated uint32 device_version = 4;             // Description of connecting device version. Not mandatory.
+
+	repeated uint32 application_description = 5;    // Description of connecting application, e.g. "Tyl� Panel App". Not mandatory.
+
+	repeated uint32 application_version = 6;        // Description of connecting application version. Not mandatory.
+
+	optional External_unit_features external_unit_features = 7; // External system features, for compatibility support.
+}
+
+
+// #APP_GUI# Connection/discovery management.
+message Disconnect_request {
+}
+
+
+// Sent by sauna system as reply to Connect_request. In addition to connection status message includes:
+// - Communication parameters: time-outs.
+// - Basic sauna system characteristics, control board type and (panel) brand. These are not changed during runtime and are provided in connect reply to enable external system to e.g. adapt GUI initially. Many are also provided in the Announcement message.
+// #APP_GUI# Connection/discovery management.
+message Connect_reply
+{
+	// Status of connection
+	enum connect_status_t {
+	    CONNECT_ACCEPTED = 10;                 // Connection established.
+	    CONNECT_REJECTED_PIN = 20;             // Connect_request: connection not accepted due to incorrect PIN.
+	    CONNECT_REJECTED_COMPATIBILITY = 21;   // Connect_request: connection not accepted due to protocol incompatibility. For future use. Client need to be updated.
+	    CONNECT_REJECTED = 22;                 // Connect_request: connection not accepted, other reason.
+	    CONNECT_REJECTED_DOORSWITCH = 23;      // Connect_request: connection not accepted due to no doorswitch.
+	}
+
+	optional connect_status_t status = 1;	// Mandatory field.
+
+	optional string system_id = 2;  // Unique identity (see http://qt-project.org/doc/qt-4.8/quuid.html) of sauna system.  Mandatory field.
+
+	optional Connection_types.brand_t brand = 3;  // Control panel brand. Mandatory field.
+
+	optional uint32 communication_time_out = 4;  // Timeout in seconds until server detects a potential loss of connection. External unit shall periodically send message at least within this time frame, typically message Keep_alive. Mandatory field.
+
+	optional uint32 communication_lost_time_out = 5;  // Timeout in seconds until server detects a loss of connection. At loss of connection server disconnects external unit, which has to reconnect. Mandatory field.
+
+	optional Connection_types.system_type_t system_type = 11;    // Sauna system type. If not present system type is standard.
+
+	optional Connection_types.rcb_product_t rcb_product = 6; // Type of (master) control board. Mandatory field.
+
+	repeated uint32 system_name = 7; // User provided identification name of sauna control panel. Mandatory field.
+
+	optional Sauna_features sauna_features = 8;  // Sauna features, for compatibility support.
+
+	repeated uint32 application_description = 9;    // Description of sauna system application, e.g. "Control Panel".
+
+	repeated uint32 application_version = 10;        // Description of sauna system application version.
+
+	// Field id 11 used above
+
+}
+
+
+// Sauna system reply to any message: Connection lost due to time-out, external system needs to reconnect
+// #APP_GUI# Connection/discovery management.
+message No_connection
+{
+}
+
+
+// For communication keep-alive
+// #APP_GUI# Connection/discovery management.
+message Keep_alive
+{
+    optional uint32 sequence_number = 1;  // When sent by external system, sauna system will fill it's Keep-alive reply with same sequence number.
+}

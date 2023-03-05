@@ -1,0 +1,91 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       user_setting.proto
+/// \brief      Messages for user settings exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+
+// Defines a notification of a user setting. These settings are local for the control panel.
+// An external system can follow panel settings by adapting to these settings.
+// User settings can not be changed by external system.
+message User_setting
+{
+	enum temperature_unit_t {
+	    TEMP_UNIT_CELSIUS = 10;
+	    TEMP_UNIT_FAHRENHEIT  = 11;
+
+	}
+
+	enum temperature_presentation_t {
+		TEMP_PRES_SMOOTH = 10;          // Corresponds to 'filtered'
+		TEMP_PRES_DIRECT = 11;          // Corresponds to 'not filtered'
+	}
+
+	enum humidity_presentation_t {
+		HUM_PRES_SMOOTH = 10;          // Corresponds to 'filtered'
+		HUM_PRES_DIRECT = 11;          // Corresponds to 'not filtered'
+	}
+
+	enum date_format_t {
+		DATE_YYMMDD = 10;
+		DATE_DDMMYY = 11;
+		DATE_MMDDYY = 12;
+	}
+
+	enum time_format_t {
+		TIME_0_24 = 10;
+		TIME_AM_PM = 11;
+	}
+
+	enum weekstart_t {
+		WEEKSTART_MONDAY = 10;
+		WEEKSTART_SUNDAY = 11;
+	}
+
+	enum language_t {
+        LANG_CZECH = 200;
+        LANG_DUTCH = 201;
+        LANG_ENGLISH = 202;
+        LANG_FINNISH = 203;
+        LANG_FRENCH = 204;
+        LANG_GERMAN = 205;
+        LANG_POLISH = 206;
+        LANG_RUSSIAN = 207;
+        LANG_SLOVAK = 208;
+        LANG_SPANISH = 209;
+        LANG_SWEDISH = 210;
+        LANG_DANISH  = 211;
+        LANG_NORWEGIAN  = 212;
+        LANG_PORTUGUESE  = 213;
+	}
+
+	optional temperature_unit_t temperature_unit = 1;
+    // #APP_GUI# All temperature values.
+
+	optional temperature_presentation_t temperature_presentation = 2;
+    // #APP_GUI# Overview external temperature.
+
+	optional humidity_presentation_t humidity_presentation = 3;
+    // #APP_GUI# Overview external humidity.
+
+	optional date_format_t date_format = 4;
+    // #APP_GUI# All presented dates, but due to limitations in functionality there are not many. To be checked if 'Starting at' in overview shows date.
+
+	optional time_format_t time_format = 5;
+    // #APP_GUI# All presented times.
+
+	optional weekstart_t weekstart = 6;
+    // #APP_GUI# PC panel only.
+
+	optional language_t language = 7;
+    // #APP_GUI# PC panel only.
+}

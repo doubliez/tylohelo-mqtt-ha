@@ -1,0 +1,52 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       node.proto
+/// \brief      Messages for (HeaterNet) node information exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+message Node_types
+{
+	enum rcb_t
+	{
+		RCB_MASTER = 0;
+		RCB_SLAVE_1 = 1;
+		RCB_SLAVE_2 = 2;
+	}
+}
+
+
+// Defines a HeaterNet node item.
+// The node items can be used to determine whether there are slaves in the system:
+//- Master is always at index 0.
+//- Other items with valid heaternet addresses and profile PROFILE_RELAY_CONTROL_BOARD are slaves.
+message Node_item
+{
+	enum profile_t {
+		PROFILE_RELAY_CONTROL_BOARD = 10;
+		PROFILE_CONTROL_PANEL = 11;
+		PROFILE_TEMPERATURE_HUMIDITY_SENSOR = 12;
+        PROFILE_UNKNOWN = 13;   // Other/unknown
+	}
+
+	optional uint32 index = 1;   // Node index 0..7. Mandatory field.
+
+	optional uint32 address  = 2;   // Heaternet address. Value >= 0x40 is a valid address. Mandatory field.
+
+    optional profile_t profile = 3; // Mandatory field.
+
+    optional uint32 product = 4;  // Additional product type specification. Mandatory field.
+
+	optional string heaternet_version = 5;   // Version of heaternet on node. Mandatory field.
+
+    optional string application_version = 6; // Version of node application. Mandatory field.
+
+}

@@ -1,0 +1,75 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       calendar.proto
+/// \brief      Messages for calendar program exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+
+// Defines system warm up characteristics: This can be used by external system to indicate suitability of start time for calendar programs using start mode START_MODE_READY_AT.
+// E.g. estimated heating time can be calculated from program bath temperature, current temperature and heating_ratio to give messages that remaining time is insufficient.
+// #APP_GUI# To be used when calendar program is saved.
+message Warm_up_characteristics
+{
+	optional bool calibrated = 1; // Whether sauna system determines warm up calibration successful. Uncalibrated warm up characteristics should not be used.
+
+	optional uint32 heating_ratio = 2; // Warm up speed in unit Celsius*9 / minute, i.e. 18 means 2C/minute.
+
+	optional uint32 count = 3; // Number of samples calibration is based on. Indicates quality of heating_ratio.
+
+}
+
+
+// Defines a calendar post. A calendar post defines a scheduled program, either:
+// - A weekday program which is repeated as specific weekday. After completion sauna system reschedules it for the next week.
+// - A date program which is executed once, deleted after completion.
+// - Delayed start program, special program - similar to date program - for execution within 24h.
+//
+// Note that allocation of calendar programs by control panel follows both rules and praxis:
+// Index 0: Always allocated for delayed start program.
+// Index 1..21:  Date programs.
+// Index 22..27: Monday weekday programs.
+// Index 28..33: Tuesday weekday programs.
+// Index 34..39: Wednesday weekday programs.
+// Index 40..45: Thursday weekday programs.
+// Index 46..51: Friday weekday programs.
+// Index 52..57: Saturday weekday programs.
+// Index 58..63: Sunday weekday programs.
+// The date and weekday index allocation is not mandatory, but control panels have limitations on how many weekday programs can be created per weekday: 4 for MID panel and 6 for HIGH panel. External system should follow this.
+// #APP_GUI# Calendar programming.
+message Calendar_post
+{
+    enum start_mode_t {
+        START_MODE_START_AT = 1;
+        START_MODE_READY_AT = 2;
+    }
+
+	optional uint32 index = 1;   // Program index 0..63. Mandatory field. Index 0 is reserved for delayed start program. For delayed start program, sauna system will (for backward compatibility) set boolean values DELAYED_START_ENABLE and DELAYED_START_RUNNING. Delayed start program shall always have an activation time <= 24h from current time.
+
+	optional bool valid = 2;   // Whether calendar post is used. If post is not valid other remaining fields are not applicable and may be omitted.
+
+    optional uint64 activation_time = 3; // Program activation time as milliseconds since 2000-01-01 00:00:00.000.
+
+	optional uint32 bath_time = 4;  // Bath time in minutes.
+
+	optional uint32 humidity_set_point = 5;  // Program humidity setpoint, 0-100 is %, 101-111 is step 0-10. This field is ignored if field favorite is present.
+
+	optional uint32 temperature_set_point = 6; // Temperature setpoint, unit Celsius*9. This field is ignored if field favorite is present.
+
+	optional bool weekday = 7;  // Whether program is a weekday program. Day of week is given by activation time.
+
+    optional start_mode_t start_mode = 8;  // Start mode.
+
+    optional bool standby = 9; // Whether program is a standby program, i.e. will run with reduced temperature.
+
+    optional uint32 favorite = 10; // Index of favorite program shall use, 0..7. Value 100 can be used by external system to explictly state that calendar program has no favorite reference. If this field is present, and not set to 100, humidity_set_point is ignored.
+
+}

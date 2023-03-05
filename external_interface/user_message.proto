@@ -1,0 +1,53 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       user_message.proto
+/// \brief      Messages for user message exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+import "node.proto";
+
+package tylohelo;
+
+
+// Defines a user message.
+// Messages are defined using an identity, external units need to have the same mapping to texts as control panel.
+// A few messages are completed with parameters, this needs to be done in the external unit as settings may affect how parameters are formatted.
+//
+// #APP_GUI# Used to show messages from control board and, when answered, reply to control board.
+message User_message
+{
+	enum message_type_t {
+	    TYPE_NO_MESSAGE = 10;        // Message is acknowledged or shall by other reason no longer be shown for user.
+	    TYPE_OK  = 11;               // Message us a user message shall be shown with an 'Ok' button
+		TYPE_YES_NO = 12;            // Message shall user message  be shown with 'Yes' and 'No' buttons
+		TYPE_ERROR = 13;             // Message is an error message (will also be in error log), shall be shown 'Ok' button
+		TYPE_ERROR_NO_BUTTON = 14;	 // Message is an error message requiring restart (will also be in error log), shall be shown without button.
+	}
+
+	enum answer_t {
+		ANSWER_NONE = 20;            // Message has not been answered
+		ANSWER_OK = 21;              // Message answered Ok
+		ANSWER_YES = 22;             // Message answered Yes
+		ANSWER_NO = 24;              // Message answered No
+	}
+
+
+	optional uint32 identity = 1;                // Message identity. If identity is unknown to external unit, it can use the formatted message provided in field formatted_panel_message. Mandatory field.
+
+	optional message_type_t message_type = 2;    // Message type. Mandatory field.
+
+	optional answer_t answer = 3;                // Message answer. Mandatory field.
+
+	optional uint32 presentation_time = 4;       // Message show time (currently not used for messages originating in control board, may be used if panel sends messages to external unit). If not present or set to 0 no limited presentation time.
+
+	repeated uint32 formatted_panel_message = 5; // Presented panel message. Can be used as fallback in case message identity is unknown to external unit. Due to technical limitations message is translated to the language used be the control panel.
+
+	optional Node_types.rcb_t rcb_origin = 6; // RCB message source. This field is currently always present, but is optional to enable future messages with other origin than RCBs.
+
+}

@@ -1,0 +1,36 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       error.proto
+/// \brief      Messages for (system) error exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+import "node.proto";
+
+
+package tylohelo;
+
+// Defines an error log post. Note: This is normally not used to present messages, but for presentation of an error log.
+// Sauna system will send specific messages for showing messages.
+// #APP_GUI# PC panel only.
+message Error_post
+{
+
+	optional uint32 index = 1;   // Error index 0..31. Mandatory field.
+
+	optional bool valid = 2;   // Whether error post is used.
+
+    optional uint64 raise_time = 3; // Error occurrence time as milliseconds since 2000-01-01 00:00:00.000.
+
+	optional uint32 error_code = 4;  // Error identity. Shall be mapped to an error message text by external system.
+
+	optional bool acknowledged = 5;  //
+
+	optional Node_types.rcb_t rcb_source = 6;  // Error origin.
+
+}

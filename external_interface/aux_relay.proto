@@ -1,0 +1,81 @@
+///////////////////////////////////////////////////////////////////////////////
+///
+/// \file       aux_relay.proto
+/// \brief      Messages for auxiliary relay exchange between external unit and Tyl�Helo system
+///
+/// \author Combitech AB, J�nk�ping, Sweden.
+/// \copyright Tyl� Helo AB, Halmstad, Sweden, 2015. All rights reserved.
+///
+///////////////////////////////////////////////////////////////////////////////
+
+option optimize_for = LITE_RUNTIME;
+
+
+package tylohelo;
+
+// Defines on-off time for auxiliary relay post in frequency function.
+message Aux_relay_timing
+{
+	enum scaling_t {
+		SCALE_100_MSEC = 10;
+		SCALE_SECOND = 11;
+		SCALE_MINUTE = 12;
+		SCALE_HOUR = 13;
+	}
+
+	optional scaling_t scaling = 10;   // Defines unit of field value. Mandatory field.
+
+	optional uint32 value = 11;        // Mandatory field.
+}
+
+
+
+// Defines an auxiliary relay post.
+// Due to the characteristics of underlying data storage the aux relay name may be separately updated by sauna system.
+message Aux_relay_post
+{
+	enum function_t {
+		FUNC_NOT_USED = 10;
+		FUNC_ON_OFF = 11;
+		FUNC_FREQUENCY = 12;
+	}
+
+	optional uint32 index = 1;   // Aux relay index 0..6. Mandatory field.
+
+	optional function_t function = 2;   // Aux relay function, not used or type of operation.
+
+	repeated uint32 name = 3;   // Name of aux relay. Max string length is 20 characters.
+    // The aux relay name is stored in control board and can thus only contains supported characters. See message Sauna_function_support and command SEND_CHARACTER_TABLE.
+
+	optional bool active = 4;   // Aux relay activation, false is off i.e. control board will not set relay high.
+
+	optional Aux_relay_timing off_time = 5;  // Aux relay timing, off time, for frequency function.
+
+	optional Aux_relay_timing on_time = 6;   // Aux relay timing, on time, for frequency function.
+}
+
+
+// Defines an auxiliary relay post provided by sauna system.
+// #APP_GUI# Connected and active auxiliary relays are presented in Settings and Favorite tab.
+message Aux_relay_post_sauna
+{
+	optional bool connected = 1;   // Whether aux_relay_post below is connected to (i.e. at all usable) by sauna system. Number of aux relays varies between different variants of sauna control boards. Mandatory field.
+
+	optional Aux_relay_post aux_relay_post= 2;  //  Mandatory field.
+}
+
+
+// Defines sauna descaling. Descaling allocates an aux relay for tank descaling.
+// #APP_GUI# Aux relay used for descaling is not shown among auxiliary relays presented in Settings and Favorite tab.
+message Descaling
+{
+	optional uint32 aux_index = 1;   // Index 0..6 of aux relay used for descaling. Descaling on and off time is set in the aux register. If not present, descaling is not used.
+
+	optional bool enabled = 2;  // Descaling enable.
+
+	optional uint32 day_of_week = 3;  // Day of week for descaling, 0=Monday, 1=Tuesday etc.
+
+	optional uint32 start_time = 4;   // Start time in minutes after 00:00.
+
+	optional uint32 dosage = 5;       // Descaling dosage in ml.
+}
