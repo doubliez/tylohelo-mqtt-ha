@@ -532,11 +532,6 @@
         console.log(`Waiting for KeepAlive reply (timeout = ${sauna.communicationLostTimeOut}s)`);
 
         this.#keepAlives[saunaId].timeoutObj = setTimeout(() => {
-            this.#saunaService.updateSauna({
-                systemId: saunaId,
-                available: false
-            });
-            this.#mqttService.publish(sauna, 'available', false);
             this.disconnect(saunaId);
         }, sauna.communicationLostTimeOut * 1000);
     }

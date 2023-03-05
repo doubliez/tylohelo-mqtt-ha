@@ -11,11 +11,11 @@ const MQTT_URL = process.env.MQTT_URL;
 
 const udpService = new UdpService();
 const protoBufService = new ProtoBufService();
-const saunaService = new SaunaService();
+const mqttService = new MqttService(MQTT_URL);
+const saunaService = new SaunaService(mqttService);
 const dataService = new DataService();
 const calendarService = new CalendarService(dataService);
 const messageHandlerService = new MessageHandlerService(dataService, calendarService);
-const mqttService = new MqttService(MQTT_URL);
 
 new ComService(
     udpService,

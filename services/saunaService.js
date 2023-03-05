@@ -1,7 +1,9 @@
 ﻿export class SaunaService {
+    #mqttService;
     #saunas = {};
 
-    constructor() {
+    constructor(mqttService) {
+        this.#mqttService = mqttService;
         setInterval(() => {
             this.timedUpdate();
         }, 3000);
@@ -12,11 +14,13 @@
             const sauna = this.#saunas[saunaId];
             if (!sauna.lastMsgTime) {
                 sauna.available = false;
+                this.#mqttService.publish(sauna, 'available', false);
             } else {
                 const timeDiff = Math.abs(new Date().getTime() - sauna.lastMsgTime.getTime());
                 const diffSec = Math.ceil(timeDiff / 1000);
                 if (sauna.available && diffSec > 20) {
                     sauna.available = false;
+                    this.#mqttService.publish(sauna, 'available', false);
                 }
             }
         }
