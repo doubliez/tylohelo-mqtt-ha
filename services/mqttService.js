@@ -149,8 +149,9 @@ export class MqttService extends EventEmitter {
                 availability,
                 availability_mode: 'all',
                 state_topic: `${topicPrefix}error`,
+                value_template: '{{ value_json.state }}',
                 json_attributes_topic: `${topicPrefix}error`,
-                value_template: '{{ value_json.state }}'
+                json_attributes_template: '{{ value_json.message }}'
             }
         ];
 
