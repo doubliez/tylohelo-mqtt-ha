@@ -7,7 +7,7 @@ import { ProtoBufService } from './services/protoBufService.js';
 import { SaunaService } from './services/saunaService.js';
 import { UdpService } from './services/udpService.js';
 
-const MQTT_URL = 'mqtt://iot:IoT-MQTT!@192.168.10.140';
+const MQTT_URL = process.env.MQTT_URL;
 
 const udpService = new UdpService();
 const protoBufService = new ProtoBufService();
