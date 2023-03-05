@@ -209,7 +209,7 @@ export class MqttService extends EventEmitter {
             },
             {
                 unique_id: slugify(`${bn}-${tn}-${id}-standby-offset-temp`),
-                name: sauna.systemName + ' StandBy Offset Temp',
+                name: sauna.systemName + ' Standby Offset Temp',
                 device,
                 device_class: 'temperature',
                 unit_of_measurement: '°C',
@@ -231,7 +231,7 @@ export class MqttService extends EventEmitter {
             },
             {
                 unique_id: slugify(`${bn}-${tn}-${id}-tank-standby-temp`),
-                name: sauna.systemName + ' Tank StandBy Temp',
+                name: sauna.systemName + ' Tank Standby Temp',
                 device,
                 device_class: 'temperature',
                 unit_of_measurement: '°C',
