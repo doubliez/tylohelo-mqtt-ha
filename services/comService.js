@@ -396,7 +396,6 @@
             this.#initialDiscovery[saunaId] = {};
         }
         clearTimeout(this.#initialDiscovery[saunaId].timeoutObj);
-        delete this.#initialDiscovery[saunaId].timeoutObj;
         this.#initialDiscovery[saunaId].sent = false;
 
         this.#initialDiscovery[saunaId].timeoutObj = setTimeout(() => {
@@ -409,13 +408,17 @@
         }, 10000);
     }
 
-    disconnect(saunaId) {
+    disconnect(saunaId, fromSauna = false) {
         const sauna = this.#saunaService.getSauna(saunaId);
         if (sauna) {
             this.stopKeepAlive(saunaId);
-            console.log(`Disconnecting from sauna ${sauna.systemId} (${sauna.systemName})...`);
-            const disconreq = this.#protoBufService.createDisconnectRequestMsg();
-            this.#udpService.sendPacket(disconreq, sauna.ip, sauna.port);
+            if (fromSauna) {
+                console.log(`Sauna ${sauna.systemId} (${sauna.systemName}) told us we are not connected...`);
+            } else {
+                console.log(`Disconnecting from sauna ${sauna.systemId} (${sauna.systemName})...`);
+                const disconreq = this.#protoBufService.createDisconnectRequestMsg();
+                this.#udpService.sendPacket(disconreq, sauna.ip, sauna.port);
+            }
 
             this.#saunaService.updateSauna({
                 systemId: saunaId,
@@ -455,6 +458,10 @@
         if (msg.connectReply) {
             this.handleConnectReply(msg);
             return;
+        }
+
+        if (msg.noConnection) {
+            this.disconnect(saunaId, true);
         }
 
         if (msg.keepAlive) {
@@ -519,25 +526,19 @@
     }
 
     sendKeepAlive(saunaId) {
-        if (this.#keepAlives[saunaId].timeoutObj) {
-            // Awaiting reply from sauna
-            return;
-        }
         const sauna = this.#saunaService.getSauna(saunaId);
         const msg = this.#protoBufService.createKeepAliveMsg(
             ++this.#keepAlives[saunaId].seqNumber
         );
         this.#udpService.sendPacket(msg, sauna.ip, sauna.port);
-
-        console.log(`Waiting for KeepAlive reply (timeout = ${sauna.communicationLostTimeOut}s)`);
-
-        this.#keepAlives[saunaId].timeoutObj = setTimeout(() => {
-            this.disconnect(saunaId);
-        }, sauna.communicationLostTimeOut * 1000);
     }
 
     handleKeepAliveReply(saunaId) {
+        const sauna = this.#saunaService.getSauna(saunaId);
+
         clearTimeout(this.#keepAlives[saunaId].timeoutObj);
-        delete this.#keepAlives[saunaId].timeoutObj;
+        this.#keepAlives[saunaId].timeoutObj = setTimeout(() => {
+            this.disconnect(saunaId);
+        }, sauna.communicationLostTimeOut * 1000);
     }
 }
