@@ -365,8 +365,13 @@
             console.error('No port in announcement message!');
             return;
         }
-        const sauna = this.updateAvailableSaunas(announcementMsg, pack.fromIp);
-        this.#mqttService.publish(sauna, 'available', true);
+        let sauna = this.#saunaService.getSauna(announcementMsg.systemId);
+        const wasAvailable = sauna?.available;
+        sauna = this.updateAvailableSaunas(announcementMsg, pack.fromIp);
+
+        if (!wasAvailable) {
+            this.#mqttService.publish(sauna, 'available', true);
+        }
 
         if (!this.#autoConnect) {
             console.log(`Auto-Connect OFF - Not connecting to sauna ${sauna.systemId} (${sauna.systemName})`);
