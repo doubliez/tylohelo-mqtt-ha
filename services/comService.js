@@ -462,6 +462,7 @@
 
         if (msg.noConnection) {
             this.disconnect(saunaId, true);
+            return;
         }
 
         if (msg.keepAlive) {
