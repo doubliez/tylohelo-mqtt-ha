@@ -25,14 +25,14 @@ export class MqttService extends EventEmitter {
         });
     }
 
-    publish(sauna, partialTopic, message) {
+    publish(sauna, partialTopic, message, options) {
         const bn = slugify(sauna.brandName, { lower: true });
         const tn = slugify(sauna.typeName, { lower: true });
         const id = sauna.systemId;
 
         const topic = `${this.#topicPrefix}${bn}-${tn}/${id}/${partialTopic}`;
 
-        this.#client.publish(topic, `${message}`);
+        this.#client.publish(topic, `${message}`, options);
     }
 
     publishDiscovery(sauna, data, startup = true) {

@@ -370,7 +370,7 @@
         sauna = this.updateAvailableSaunas(announcementMsg, pack.fromIp);
 
         if (!wasAvailable) {
-            this.#mqttService.publish(sauna, 'available', true);
+            this.#mqttService.publish(sauna, 'available', 'true', { retain: true });
         }
 
         if (!this.#autoConnect) {
@@ -431,7 +431,7 @@
             });
             this.#dataService.resetData(saunaId);
 
-            this.#mqttService.publish(sauna, 'connected', false);
+            this.#mqttService.publish(sauna, 'connected', 'false', { retain: true });
         }
     }
 
@@ -501,7 +501,7 @@
             this.sendHumidityTableRequest(sauna.systemId);
             this.sendTemperatureTableRequest(sauna.systemId);
 
-            this.#mqttService.publish(sauna, 'connected', true);
+            this.#mqttService.publish(sauna, 'connected', 'true', { retain: true });
         } else {
             console.error(`Connection to sauna ${sauna.systemId} failed with status ${msg.connectReply.status}!`);
         }
