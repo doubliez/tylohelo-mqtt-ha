@@ -14,7 +14,7 @@
   "author": "Thibault Doubliez <thibault@doubliez.com>",
   "license": "ISC",
   "dependencies": {
-    "mqtt": "^4.3.7",
+    "mqtt": "^5.3.5",
     "protobufjs": "^7.2.2",
     "slugify": "^1.6.5"
   },
